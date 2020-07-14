@@ -36,13 +36,13 @@ void UBullCowCartridge::SetupGame()
     PrintLine(TEXT("Welcome to Bull Cows!"));
      
     HiddenWord =Isograms[FMath::RandRange(0, Isograms.Num() - 1)]; // Set he HiddenWord
-    Lives = HiddenWord.Len();  // Set lives
+    Lives = HiddenWord.Len() * 2;  // Set lives
     bGameOver = false; // Prompt player for guess
 
     PrintLine(TEXT("Guess the %i letter word!"), HiddenWord.Len()); // Magic number Remove!
+    //PrintLine(TEXT("The HiddenWord is: %s."), *HiddenWord); // Debug line
     PrintLine(TEXT("You have %i lives"), Lives);
     PrintLine(TEXT("Type in you guess and \npress enter to continue..."));
-    PrintLine(TEXT("The HiddenWord is: %s."), *HiddenWord); // Debug line
 }
 
 void UBullCowCartridge::EndGame()
@@ -92,12 +92,14 @@ void UBullCowCartridge::ProcessGuess(const FString& Guess)
     }
 
     // show the player Bulls and Cows
+    FBullCowCount Score = GetBullCows(Guess);
+
+    PrintLine(TEXT("You have %i Bulls and %i Cows"), Score.Bulls, Score.Cows);
     PrintLine(TEXT("Guess again, you have %i live left"), Lives);
 }
 
 bool UBullCowCartridge::IsIsogram(const FString& Word) const
 {
-
     // int32 Index = 0;
     // int32 Comparison = Index + 1;
     for ( int32 Index = 0; Index < Word.Len(); Index++)
@@ -133,4 +135,32 @@ TArray<FString> UBullCowCartridge::GetValidWords(const TArray<FString>& WordList
     }
 
     return ValidWords;
+}
+
+FBullCowCount UBullCowCartridge::GetBullCows(const FString& Guess) const
+{
+    FBullCowCount Count;
+
+    // for every index Guess is same as index hidden, BullCount++
+    // if not a bull was it a cow? it yes CowCount++
+
+    for (int32 GuessIndex = 0; GuessIndex < Guess.Len(); GuessIndex++)
+    {
+        if(Guess[GuessIndex] == HiddenWord[GuessIndex])
+        {
+           Count.Bulls ++;
+           continue;
+        }
+
+        for (int32 HiddenIndex = 0; HiddenIndex < HiddenWord.Len(); HiddenIndex++)
+        {
+            if(Guess[GuessIndex] == HiddenWord[HiddenIndex])
+            {
+                Count.Cows ++;
+                break;
+            }
+        }
+    }
+
+    return Count;
 }
